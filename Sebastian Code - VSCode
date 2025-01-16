@@ -10,7 +10,3 @@ df.head()
 # making a cleaned-up dataset
 df1 = df
 
-# importing the models and splitting methods
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.linear_model import LogisticRegression
