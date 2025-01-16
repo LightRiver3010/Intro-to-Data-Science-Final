@@ -3,3 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 %matplotlib inline
+
+df = pd.read_csv('./data/Student Depression Dataset.csv')
+df.head()
+
+# making a cleaned-up dataset
+df1 = df
