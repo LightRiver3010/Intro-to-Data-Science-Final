@@ -30,7 +30,7 @@ p <- ggplot(
   
 animate(p, renderer = gifski_renderer())
 
-
+#Attempting to isolate a specific column 
 df1 <- filter(p, continent = 'Asia')
 df1 <- p
 df1 <- filter(p, continent = 'Asia')
