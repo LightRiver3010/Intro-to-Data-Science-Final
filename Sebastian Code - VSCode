@@ -10,3 +10,124 @@ df.head()
 # making a cleaned-up dataset
 df1 = df
 
+# importing the models and splitting methods
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+df.columns
+
+# changing Gender column to fix model
+# Male == 0, Female = 1
+df1['Gender'].value_counts()
+def gender_converter(args):
+    if args == 'Male':
+        return 0
+    elif args == 'Female':
+        return 1
+    else:
+        return args
+df1["Gender"] = df1["Gender"].apply(gender_converter)
+df1.head()
+
+# renaming columns
+df1 = df1.rename(columns = {"Have you ever had suicidal thoughts ?": "Suicidal throughts present?", 
+"Family History of Mental Illness" : "Family History of Mental Illness?"})
+df1.head()
+
+#changing values to 0 and 1
+def boolean_changer(args):
+    if args == "Yes":
+        return 1
+    elif args == "No":
+        return 0
+    else:
+        return args
+df1["Suicidal throughts present?"] = df1["Suicidal throughts present?"].apply(boolean_changer)
+df1["Family History of Mental Illness?"] = df1["Family History of Mental Illness?"].apply(boolean_changer)
+df1.head()
+
+# fixing 'Sleep Duration' column
+df1 = df1[df1['Sleep Duration'] != 'Others']
+df1['Sleep Duration'].value_counts()
+
+def sleep_converter(args):
+    if args == "7-8 hours":
+        return 3
+    elif args == "5-6 hours":
+        return 2
+    elif args == 'Less than 5 hours':
+        return 1
+    elif args == 'More than 8 hours':
+        return 4
+df1["Sleep Duration"] = df1["Sleep Duration"].apply(sleep_converter)
+df1.head()
+
+# Fixing Dietary Habits
+df1 = df1[df1['Dietary Habits'] != 'Others']
+df1['Dietary Habits'].value_counts()
+
+# Better diet == higher int value
+def dietary_changer(args):
+    if args == "Healthy":
+        return 3
+    elif args == "Moderate":
+        return 2
+    elif args == 'Unhealthy':
+        return 1
+    else:
+        return args
+df1["Dietary Habits"] = df1["Dietary Habits"].apply(dietary_changer)
+df1.head()
+
+df1['Job Satisfaction'].value_counts() # job satisfaction has little to no variance so it's getting dropped lol
+df1 = df1.drop('Job Satisfaction', axis = 1)
+df1.head()
+
+df1['Work Pressure'].value_counts() # also has lack of variance
+df1 = df1.drop('Work Pressure', axis = 1)
+df1.head()
+
+df1['Study Satisfaction'].value_counts() # has variance, so it can stay :)
+
+#fixing the cities column
+df1['City'].value_counts() # has variance so we can't disregard it
+
+# filter out the cities with low populations/are outliers
+df1 = df1[df1['City'].map(df1['City'].value_counts()) > 2]
+df1['City'].value_counts()
+
+# creating a column that organizes each city into a state
+def state_converter(args):
+    if args == 'Srinagar':
+        return "Jammu and Kashmir"
+    elif args == 'Hyderabad':
+        return "Telagana"
+    elif (args == "Vasai-Virar") or (args == "Thane") or (args == "Pune") or (args == "Mumbai") or (args == "Nagpur") or (args == "Nashik"):
+        return "Maharashtra"
+    elif (args == "Lucknow") or (args == "Agra") or (args == "Meerut") or (args == "Ghaziabad") or (args == "Vadodara") or (args == "Varanasi") or (args == "Kanpur"):
+        return "Uttar Pradesh"
+    elif args == "Ludhiana":
+        return "Punjab"
+    elif (args == "Surat") or (args == "Ahmedabad") or (args == "Rajkot") or (args == "Vadodara"):
+        return "Gujarat"
+    elif args == "Kolkata":
+        return "West Bengal"
+    elif args == "Jaipur":
+        return "Rajasthan"
+    elif args == "Patna":
+        return "Bihar"
+    elif args == "Visakhapatnam":
+        return "Andhra Pradesh"
+    elif (args == "Bhopal") or (args == "Indore"):
+        return "Madhya Pradesh"
+    elif args == "Chennai":
+        return "Tamil Nadu"
+    elif args == "Delhi":
+        return "NCT of Delhi"
+    elif args == "Bangalore":
+        return "Karnataka"
+    elif args == "Faridabad":
+        return "Haryana"
+df1["State"] = df1["City"].apply(state_converter)
+df1['State'].value_counts()
