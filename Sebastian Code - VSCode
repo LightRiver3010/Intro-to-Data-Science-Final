@@ -131,3 +131,37 @@ def state_converter(args):
         return "Haryana"
 df1["State"] = df1["City"].apply(state_converter)
 df1['State'].value_counts()
+
+# dividing each state into respective regions
+def region_converter(args):
+    if (args == 'Uttar Pradesh')   or (args == 'Madhya Pradesh'):
+        return 'Central'
+    elif (args == 'Uttar Pradesh') or (args == 'Telagana') or (args == 'Andhra Pradesh') or (args == 'Tamil Nadu') or (args == 'Karnataka'):
+        return 'Southern'
+    elif (args == 'Jammu and Kashmir') or (args == 'Punjab') or (args == 'Rajasthan') or (args == 'NCT of Delhi') or (args == 'Haryana'):
+        return 'Northern'
+    elif (args == 'West Bengal') or (args == 'Bihar'):
+        return 'Eastern'
+    elif (args == 'Maharashtra') or (args == 'Gujarat'):
+        return 'Western'
+    else:
+        return "bruh"
+df_processed["Region"] = df_processed["State"].apply(region_converter)
+df_processed['Region'].value_counts()
+
+# making the regions numerical
+def region_converter(args):
+    if (args == 'Uttar Pradesh')   or (args == 'Madhya Pradesh'): # Central
+        return '1'
+    elif (args == 'Uttar Pradesh') or (args == 'Telagana') or (args == 'Andhra Pradesh') or (args == 'Tamil Nadu') or (args == 'Karnataka'): # Southern
+        return '2'
+    elif (args == 'Jammu and Kashmir') or (args == 'Punjab') or (args == 'Rajasthan') or (args == 'NCT of Delhi') or (args == 'Haryana'): # Northern
+        return '4'
+    elif (args == 'West Bengal') or (args == 'Bihar'): # Eastern
+        return '3'
+    elif (args == 'Maharashtra') or (args == 'Gujarat'): # Western
+        return '5'
+df_processed["Region"] = df_processed["State"].apply(region_converter)
+df_processed['Region'].value_counts()
+
+df_processed['Degree'].value_counts() # has variance
