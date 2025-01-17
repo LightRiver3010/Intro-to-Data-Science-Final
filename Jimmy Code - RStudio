@@ -10,8 +10,9 @@ library(gifski)
 install.packages("gapminder")
 library(gapminder)
 head(gapminder)
+library(palmerpenguins)
 
-#Testing Animated Graphs without proper Data (Sebastian was cleaning it up)
+#Testing Animated Graphs
 
 #1 - Animated Scatter Plot
 p <- ggplot(
@@ -27,24 +28,44 @@ p <- ggplot(
   labs(title = "Year: {frame_time}") +
   ease_aes('linear') +
   shadow_wake(wake_length = 0.1, alpha =FALSE)
-  
+
 animate(p, renderer = gifski_renderer())
 
-#Attempting to isolate a specific column 
-df1 <- filter(p, continent = 'Asia')
-df1 <- p
-df1 <- filter(p, continent = 'Asia')
+df <- gapminder
+df
 
+df1 <- df |>
+  filter(continent == 'Asia')
 
+afg <- df1 |>
+  filter(country == 'Afghanistan')
 
 #2 - Animated Line Graph
 g <- ggplot(
-  gapminder,
-  aes(x=year, y=gdpPercap)
-) +
+  df1,
+  aes(x=year, y=lifeExp, group = country)
+  ) +
   geom_line() +
   scale_color_viridis_b() +
-  labs(x= "Year", y= "GDP Percap") +
-  transition_reveal(year) +
-  geom_point()
-animate(g, renderer = gifski_renderer())
+  labs(x= "Year", y= "Life Expectancy") +
+  geom_point() +
+  transition_reveal(year)
+
+g
+
+
+#Making my own with Penguins
+penguins <- palmerpenguins::penguins
+penguins
+
+y <- ggplot(
+  penguins,
+  aes(flipper_length_mm, body_mass_g, color=bill_depth_mm) 
+) +
+  geom_point() +
+  transition_time(flipper_length_mm) +
+  ease_aes('linear')
+
+animate(y, renderer = gifski_renderer())
+
+y
