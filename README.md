@@ -12,3 +12,7 @@ Eastern = 3,
 Northern = 4,
 Western = 5.
 There were no Northeastern Indian states in our dataset
+
+The genders are labeled as follows:
+Male = 0,
+Female = 1.
