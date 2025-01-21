@@ -165,3 +165,88 @@ df_processed["Region"] = df_processed["State"].apply(region_converter)
 df_processed['Region'].value_counts()
 
 df_processed['Degree'].value_counts() # has variance
+
+## Creating Machine Learning Model
+
+# Seeeing the most accurate model
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import StratifiedKFold
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report,confusion_matrix
+
+# removing non-numerical values for the machine learning
+df_processed = df_processed.drop(['City', 'id', 'Profession', 'Degree', 'State'], axis = 1)
+df_processed.dropna(inplace = True)
+
+# creating data splits
+X = df_processed.drop('Depression',axis=1)
+Y = df_processed['Depression']
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.20, random_state=1, shuffle = True)
+models = []
+models.append(('LR', LogisticRegression(solver='liblinear', multi_class='ovr')))
+models.append(('LDA', LinearDiscriminantAnalysis()))
+models.append(('KNN', KNeighborsClassifier()))
+models.append(('RFR', RandomForestClassifier()))
+models.append(('CART', DecisionTreeClassifier()))
+models.append(('NB', GaussianNB()))
+models.append(('SVM', SVC(gamma='auto')))
+# evaluate each model in turn
+results = []
+names = []
+for name, model in models:
+    kfold = StratifiedKFold(n_splits=10, random_state=1, shuffle=True)
+    cv_results = cross_val_score(model, X_train, Y_train, cv=kfold, scoring='accuracy')
+    results.append(cv_results)
+    names.append(name)
+    print('%s: %f (%f)' % (name, cv_results.mean(), cv_results.std()))
+# Compare Algorithms
+pyplot.boxplot(results, labels=names)
+pyplot.title('Algorithm Comparison')
+pyplot.show() #SVM has the highest accuracy, so we will be using that model
+
+## Hyperoptimization
+from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.model_selection import GridSearchCV
+
+log_model = LogisticRegression()
+log_model.fit(X_train,Y_train)
+
+# Define the parameter values to be searched
+param_grid = [
+    {'penalty':['l1','l2','elasticnet'],
+    'solver': ['lbfgs','newton-cg','liblinear','sag','saga'],
+    'max_iter'  : [100,1000,2500,5000]
+}
+]
+
+# Instantiate the grid
+grid_search = GridSearchCV(LogisticRegression(max_iter=10000), param_grid, cv=5)
+
+# Fit the grid with data
+grid_search.fit(X_train, Y_train)
+
+# Printing the best parameters
+print("Best parameters:", grid_search.best_params_)
+
+log = LogisticRegression(penalty = 'l1', solver = 'saga', max_iter = 1000)
+
+log.fit(X_train,Y_train)
+predictions = log.predict(X_test)
+print(log.score(X_test, Y_test))
+cv_results = cross_val_score(log, X_train, Y_train, cv=kfold, scoring='accuracy')
+print(cv_results.mean())
+
+##Making Graphs
+import seaborn as sns
+
+#heatmap of data
+plt.figure(figsize=(12, 8))  # Set the figure size
+df_corr = df_processed.corr()
+sns.heatmap(df_corr, annot=True).set(title='Depression Heatmap')
+plt.show()
