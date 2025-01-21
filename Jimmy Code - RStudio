@@ -78,8 +78,6 @@ y
 
 
 
-
-
 #Actual Coding File
 
 library(tidyverse)
@@ -95,12 +93,14 @@ install.packages("readxl")
 library("readxl")
 install.packages('dplyr')
 library(dplyr)
+install.packages("plotly")
+library(plotly)
 
 #Importing the data
 #(School PC Version):
-#df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
+df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
 #(Laptop Version):
-df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
+#df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
 df
 glimpse(df)
 #Fixing up some columns 
@@ -112,25 +112,24 @@ df$'Work/Study Hours'
 df$Region <- as.numeric(df$Region)
 df$Region
 glimpse(df)
-bang <- df |>
-  filter(City == 'Bangalore')
-bang
-
+df <- df |>
+  rename('Study Hours' = `Work/Study Hours`)
+df
 df <- df |>
   filter(CGPA > 4.5)
 
 #Binning the GPA
-  #GPA
+#GPA
 df <- df |>
-  mutate(GPA_bin = cut(CGPA, breaks=c(5,6,7,8,9,10)))
+  mutate(GPA = cut(CGPA, breaks=c(5,6,7,8,9,10)))
 glimpse(df)
-  #Age
+#Age
 min(df$Age)
 max(df$Age)
 df <- df |>
-  mutate(Age_bin = cut(Age, breaks=c(17, 20, 25, 30, 35, 40, 45, 50, 55, 60)))
-print(df$Age_bin)
-  #Gender
+  mutate(Ages = cut(Age, breaks=c(17, 20, 25, 30, 35, 40, 45, 50, 55, 60)))
+print(df$Ages)
+#Gender
 df <- df |>
   mutate(Gender_bin = ifelse(Gender == 0, "Male", "Female"))
 df$Gender_bin
@@ -150,11 +149,11 @@ p1 <- ggplot(
 animate(p1, renderer = gifski_renderer())
 
 
-p2 <- ggplot(bang, aes(x=`Work/Study Hours`, y=Age)) +
+p2 <- ggplot(df, aes(x=`Study Hours`, y=Ages)) +
   geom_col() +
   scale_fill_distiller(palette = "Reds", direction = 1) +
   theme_minimal() 
-p2
+ggplotly(p2)
 
 #Plot 1
 bang |>
@@ -162,22 +161,51 @@ bang |>
   ggplot(aes(x=Depression, y=`Academic Pressure`)) +
   geom_tile(aes(fill=Age))
 
-#Plot 1.5
+#Plot 2 V1
 df |>
   filter(CGPA>2.5) |>
-  ggplot(aes(CGPA, `Work/Study Hours`)) +
-  geom_tile(aes(fill=Age), linewidth = 10.5)
+  ggplot(aes(GPA, `Study Hours`)) +
+  geom_tile(aes(fill=Age))
 
-#Plot 2
-df |>
-  #filter(State=='Punjab') |>
-  ggplot(aes(GPA_bin, `Work/Study Hours`)) +
-  geom_tile(aes(fill=Age_bin)) +
-  theme_bw()
+#Plot 2 V2
+p <- df |>
+  ggplot(aes(GPA, `Study Hours`)) +
+  geom_tile(aes(fill=Ages)) +
+  labs(title = "GPA vs. study Hours") +
+  scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5'))
+  
 
 
+ggplotly(p)
 
+glimpse(df)
 
 #Plot 3
-ggplot(df, aes(x=CGPA)) +
+p <- df |>
+  group_by(State) |>
+  summarize(
+    Avg_GPA = mean(CGPA, na.rm = TRUE),
+    Avg_Academic_Pressure = mean(`Academic Pressure`, na.rm = TRUE)
+  ) |>
+  ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
+  geom_col() +
+  scale_fill_distiller(palette = "GnBu", direction = 1) +
+  theme_minimal() +
+  theme (
+    panel.grid = element_blank(),
+    #panel.grid.major.y = element_line(color= "white"),
+    panel.ontop = TRUE
+  ) +
+  transition_states(State, wrap = FALSE) +
+  shadow_mark() +
+  enter_grow() +
+  enter_fade()
+
+p
+
+
+
+
+ggplot(df, aes(x=GPA)) +
+  geom_histogram(binwidth=1)
   geom_histogram(binwidth=1)
