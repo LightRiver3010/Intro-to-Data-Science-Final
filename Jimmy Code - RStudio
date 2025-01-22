@@ -98,9 +98,9 @@ library(plotly)
 
 #Importing the data
 #(School PC Version):
-df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
+#df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
 #(Laptop Version):
-#df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
+df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
 df
 glimpse(df)
 #Fixing up some columns 
@@ -133,6 +133,11 @@ print(df$Ages)
 df <- df |>
   mutate(Gender_bin = ifelse(Gender == 0, "Male", "Female"))
 df$Gender_bin
+#Depression
+df <- df |>
+  mutate(Depression_bin = ifelse(Depression == 0, "True", "False"))
+df$Depression_bin
+
 
 #Making animated graphs
 p1 <- ggplot(
@@ -166,49 +171,58 @@ df |>
   filter(CGPA>2.5) |>
   ggplot(aes(GPA, `Study Hours`)) +
   geom_tile(aes(fill=Age))
-
+#REMINDER TO SELF - ADD DEPRESSION SQUARES ON THE BELOW GRAPH
+#(thank you <3)
 #Plot 2 V2
-p <- df |>
-  group_by(State, Ages) |>
-  ggplot(aes(CGPA, `Study Hours`, fill=Ages)) +
-  geom_tile() +
-  scale_fill_brewer(palette = "Purples") +
-  labs(title = "GPA vs. study Hours") +
-  scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5')) +
-  theme_dark()
-ggplotly(p)
-
-glimpse(df)
-
 p <- df |>
   group_by(State, Ages,`Study Hours`) |>
   ggplot(aes(GPA, `Study Hours`, fill=Ages)) +
   geom_tile(color="white",
             lwd=1.5,
             linetype=1) +
-  coord_fixed() +
   scale_fill_binned(
-    guide = guide_colorsteps(even.steps=TRUE)
+    guide = guide_colorbar(
+      barwidth = 1,
+      barheight = 15,
+      title.position="top",
+      title.hjust=0.5,
+      label.position="right",
+      direction="vertical",
+      ticks.linewidth=1
+    )
   ) +
+  scale_fill_brewer(palette = "Purples", direction = 1) +
   guides(fill=guide_colorbar(barwidth = 0.5,
-                               barheight=20,
+                             barheight=20,
                              title.position = "top",
                              label.position="bottom")) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Purples") +
-  labs(title = "GPA vs. study Hours") +
-  scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5')) 
-  theme (
-    #These  three lines are from AI, I was trying to make the graph not so
-    #distant from the labels.
-    axis.text = element_text(margin=margin(t=0, r=0, b=0, l=0)),
-    plot.margin = margin(t=0, r=0, b=0, l=0),
-    plot.title = element_text(margin = margin(b=10))
-  )
+  scale_x_discrete(labels=c('5.5', '6.5', '7.5', 
+                            '8.5', '9.5'), expand=c(0.04,0)) +
+  scale_y_discrete(expand = c(0.04,0)) +
+  coord_cartesian(clip = "off") +
+  labs(
+    title = "GPA vs. Study Hours of Indian Students",
+    x = "GPA",
+    y= "# of hours studied daily",
+    key = "Age Group"
+  ) +
+theme (
+  #These first two lines are from AI, I was trying to make the graph not so
+  #distant from the labels.
+  legend.position="right",
+  legend.justification = "left",
+  legend.margin = margin(0,0,0,0),
+  legend.box.spacing= unit(0.1, "cm"),
+  axis.title = element_text(size=12),
+  axis.text = element_text(margin=margin(t=0, r=10, b=0, l=0)),
+  plot.margin = margin(t=0, r=0, b=0, l=10),
+  plot.title = element_text(face="bold", color="purple2", size=15, vjust = 55)
+)
 ggplotly(p)
 
 
-
+glimpse(df)
 
 
 
