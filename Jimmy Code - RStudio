@@ -98,9 +98,9 @@ library(plotly)
 
 #Importing the data
 #(School PC Version):
-df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
+#df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
 #(Laptop Version):
-#df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
+df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
 df
 glimpse(df)
 #Fixing up some columns 
@@ -171,16 +171,14 @@ df |>
 p <- df |>
   ggplot(aes(GPA, `Study Hours`)) +
   geom_tile(aes(fill=Ages)) +
+  scale_fill_brewer(palette = "Greens")
   labs(title = "GPA vs. study Hours") +
   scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5'))
-  
-
-
 ggplotly(p)
 
 glimpse(df)
 
-#Plot 3
+#Plot 3 (Animated)
 p <- df |>
   group_by(State) |>
   summarize(
@@ -189,9 +187,19 @@ p <- df |>
   ) |>
   ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
   geom_col() +
-  scale_fill_distiller(palette = "GnBu", direction = 1) +
+  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2) +
+  scale_x_continuous(limits = c(0, max(8.5))) +
+  scale_fill_distiller(palette = "GnBu", direction = 1,
+                       name = "Average\nAcademic\nPressure") +
+  labs(
+    x = "Average GPA",
+    y = "State"
+  ) +
+  ggtitle("Average GPA per State in India,\ncolored by average Academic Pressure") +
   theme_minimal() +
   theme (
+    plot.title=element_text(face="bold",hjust=.52, vjust=-5, color="chartreuse4", size = 20),
+    plot.background = element_rect(fill = "olivedrab2"),
     panel.grid = element_blank(),
     #panel.grid.major.y = element_line(color= "white"),
     panel.ontop = TRUE
@@ -200,12 +208,30 @@ p <- df |>
   shadow_mark() +
   enter_grow() +
   enter_fade()
-
 p
 
+#Plot 3 (Static)
+p <- df |>
+  group_by(State) |>
+  summarize(
+    Avg_GPA = mean(CGPA, na.rm = TRUE),
+    Avg_Academic_Pressure = mean(`Academic Pressure`, na.rm = TRUE)
+  ) |>
+  ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
+  geom_col() +
+  geom_text(aes(label = round(Avg_GPA, 2)), hjust = 0.2) +
+  scale_x_continuous(limits = c(0, max(8.5))) +
+  scale_fill_distiller(palette = "GnBu", direction = 1) +
+  theme_minimal() +
+  theme (
+    panel.grid = element_blank(),
+    #panel.grid.major.y = element_line(color= "white"),
+    panel.ontop = TRUE
+  )
+p
 
 
 
 ggplot(df, aes(x=GPA)) +
   geom_histogram(binwidth=1)
-  geom_histogram(binwidth=1)
+geom_histogram(binwidth=1)
