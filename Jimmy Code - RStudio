@@ -98,9 +98,9 @@ library(plotly)
 
 #Importing the data
 #(School PC Version):
-#df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
+df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
 #(Laptop Version):
-df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
+#df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
 df
 glimpse(df)
 #Fixing up some columns 
@@ -169,14 +169,49 @@ df |>
 
 #Plot 2 V2
 p <- df |>
-  ggplot(aes(GPA, `Study Hours`)) +
-  geom_tile(aes(fill=Ages)) +
-  scale_fill_brewer(palette = "Greens")
+  group_by(State, Ages) |>
+  ggplot(aes(CGPA, `Study Hours`, fill=Ages)) +
+  geom_tile() +
+  scale_fill_brewer(palette = "Purples") +
   labs(title = "GPA vs. study Hours") +
-  scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5'))
+  scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5')) +
+  theme_dark()
 ggplotly(p)
 
 glimpse(df)
+
+p <- df |>
+  group_by(State, Ages,`Study Hours`) |>
+  ggplot(aes(GPA, `Study Hours`, fill=Ages)) +
+  geom_tile(color="white",
+            lwd=1.5,
+            linetype=1) +
+  coord_fixed() +
+  scale_fill_binned(
+    guide = guide_colorsteps(even.steps=TRUE)
+  ) +
+  guides(fill=guide_colorbar(barwidth = 0.5,
+                               barheight=20,
+                             title.position = "top",
+                             label.position="bottom")) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(title = "GPA vs. study Hours") +
+  scale_x_discrete(labels=c('5.5', '6.5', '7.5', '8.5', '9.5')) 
+  theme (
+    #These  three lines are from AI, I was trying to make the graph not so
+    #distant from the labels.
+    axis.text = element_text(margin=margin(t=0, r=0, b=0, l=0)),
+    plot.margin = margin(t=0, r=0, b=0, l=0),
+    plot.title = element_text(margin = margin(b=10))
+  )
+ggplotly(p)
+
+
+
+
+
+
 
 #Plot 3 (Animated)
 p <- df |>
@@ -187,27 +222,34 @@ p <- df |>
   ) |>
   ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
   geom_col() +
-  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2) +
+  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2, color="palegreen2") +
   scale_x_continuous(limits = c(0, max(8.5))) +
-  scale_fill_distiller(palette = "GnBu", direction = 1,
+  scale_fill_distiller(palette = "Greens", direction = 1,
                        name = "Average\nAcademic\nPressure") +
   labs(
     x = "Average GPA",
     y = "State"
   ) +
-  ggtitle("Average GPA per State in India,\ncolored by average Academic Pressure") +
+  ggtitle("Average GPA per Indian State") +
   theme_minimal() +
   theme (
-    plot.title=element_text(face="bold",hjust=.52, vjust=-5, color="chartreuse4", size = 20),
-    plot.background = element_rect(fill = "olivedrab2"),
+    plot.title=element_text(face="bold",hjust=0.8, vjust=-0.5, color="palegreen2", size = 30),
+    plot.background = element_rect(fill = "springgreen4"),
     panel.grid = element_blank(),
     #panel.grid.major.y = element_line(color= "white"),
-    panel.ontop = TRUE
+    panel.ontop = TRUE,
+    axis.title.y = element_text(size = 20, color = "palegreen2"),
+    axis.text.y = element_text(size = 13, color = "palegreen2"),
+    axis.title.x = element_text(size=20, color="palegreen2"),
+    axis.text.x=element_text(size=13, color="palegreen2"),
+    legend.title = element_text(size = 15, color = "palegreen2"),
+    legend.text = element_text(size=10, color="palegreen2"),
   ) +
   transition_states(State, wrap = FALSE) +
   shadow_mark() +
   enter_grow() +
   enter_fade()
+
 p
 
 #Plot 3 (Static)
@@ -219,15 +261,36 @@ p <- df |>
   ) |>
   ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
   geom_col() +
-  geom_text(aes(label = round(Avg_GPA, 2)), hjust = 0.2) +
+  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2, color="palegreen2") +
   scale_x_continuous(limits = c(0, max(8.5))) +
-  scale_fill_distiller(palette = "GnBu", direction = 1) +
+  scale_fill_distiller(palette = "Greens", direction = 1,
+                       name = "Average\nAcademic\nPressure") +
+  labs(
+    x = "Average GPA",
+    y = "State"
+  ) +
+  ggtitle("Average GPA per Indian State") +
   theme_minimal() +
   theme (
+    plot.title=element_text(face="bold",hjust=.8, vjust=-0.5, color="palegreen2", size = 30),
+    plot.background = element_rect(fill = "springgreen4"),
     panel.grid = element_blank(),
     #panel.grid.major.y = element_line(color= "white"),
-    panel.ontop = TRUE
-  )
+    panel.ontop = TRUE,
+    axis.title.y = element_text(size = 20, color = "palegreen2"),
+    axis.text.y = element_text(size = 13, color = "palegreen2"),
+    axis.title.x = element_text(size=20, color="palegreen2"),
+    axis.text.x=element_text(size=13, color="palegreen2"),
+    legend.title = element_text(size = 15, color = "palegreen2"),
+    legend.text = element_text(size=10, color="palegreen2"),
+  ) +
+  geom_vline(xintercept = 1, color = "white", linetype=3, size =0.5) +
+  geom_vline(xintercept = 2, color = "white", linetype=3, size =0.5) +
+  geom_vline(xintercept = 3, color = "white", linetype=3, size =0.5) +
+  geom_vline(xintercept = 4, color = "white", linetype=3, size =0.5) +
+  geom_vline(xintercept = 5, color = "white", linetype=3, size =0.5) +
+  geom_vline(xintercept = 6, color = "white", linetype=3, size =0.5) +
+  geom_vline(xintercept = 7, color = "white", linetype=3, size =0.5) 
 p
 
 
