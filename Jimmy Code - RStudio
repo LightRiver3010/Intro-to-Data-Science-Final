@@ -77,6 +77,85 @@ y
 
 
 
+#Testing File
+install.packages("tidyverse")
+install.packages("ggplot2")
+library(tidyverse)
+library(ggplot2)
+install.packages("gganimate")
+library(gganimate)
+install.packages("Lahman")
+library(Lahman)
+install.packages("gifski")
+library(gifski)
+install.packages("gapminder")
+library(gapminder)
+head(gapminder)
+library(palmerpenguins)
+theme_set(theme_gray())
+
+#Testing Animated Graphs
+
+#1 - Animated Scatter Plot
+p <- ggplot(
+  gapminder,
+  aes(x= gdpPercap, y=lifeExp, size=pop, color=country) 
+) +
+  geom_point(show.legend=FALSE, alpha=0.7) +
+  scale_color_viridis_d() +
+  scale_size(range=c(2,12)) +
+  scale_x_log10() +
+  labs(x="GDP per capital", y="Life expectancy") +
+  transition_time(year) +
+  labs(title = "Year: {frame_time}") +
+  ease_aes('linear') +
+  shadow_wake(wake_length = 0.1, alpha =FALSE)
+
+animate(p, renderer = gifski_renderer())
+
+df <- gapminder
+df
+
+df1 <- df |>
+  filter(continent == 'Asia')
+
+afg <- df1 |>
+  filter(country == 'Afghanistan')
+
+#2 - Animated Line Graph
+g <- ggplot(
+  df1,
+  aes(x=year, y=lifeExp, group = country)
+) +
+  geom_line() +
+  scale_color_viridis_b() +
+  labs(x= "Year", y= "Life Expectancy") +
+  geom_point() +
+  transition_reveal(year)
+
+g
+
+
+#Making my own with Penguins
+install.packages("palmerpenguins")
+penguins <- palmerpenguins::penguins
+penguins
+
+y <- ggplot(
+  penguins,
+  aes(flipper_length_mm, body_mass_g, color=bill_depth_mm) 
+) +
+  geom_point() +
+  transition_time(flipper_length_mm) +
+  ease_aes('linear')
+
+animate(y, renderer = gifski_renderer())
+
+y
+
+
+
+
 #Actual Coding File
 
 library(tidyverse)
@@ -97,9 +176,9 @@ library(plotly)
 
 #Importing the data
 #(School PC Version):
-#df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
+df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
 #(Laptop Version):
-df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
+#df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
 df
 glimpse(df)
 #Fixing up some columns 
@@ -171,18 +250,24 @@ df |>
   ggplot(aes(GPA, `Study Hours`)) +
   geom_tile(aes(fill=Age))
 
+df |>
+  summarize(
+  Depression_present = ifelse(sum(Depression) >= (count(Depression)/2))
+  )
+df$Depression_present
 
 #REMINDER TO SELF - ADD DEPRESSION SQUARES ON THE BELOW GRAPH
 #(thank you <3)
 #Plot 2 V2
 p <- df |>
   group_by(State, Ages,`Study Hours`, Depression) |>
+  summarize(
+    Depression_present = ifelse(sum(Depression) >= (count(Depression)/2))
+  ) |>
   ggplot(aes(GPA, `Study Hours`, fill=Ages)) +
   geom_tile(color="white",
             lwd=1.5,
             linetype=1) +
-  geom_tile(data=Depression) +
-  scale_size_manual("z", values =c(3,0)) +
   scale_fill_binned(
     guide = guide_colorbar(
       barwidth = 1,
@@ -195,33 +280,27 @@ p <- df |>
     )
   ) +
   scale_fill_brewer(palette = "Purples", direction = 1) +
-  guides(fill=guide_colorbar(barwidth = 0.5,
-                             barheight=20,
-                             title.position = "top",
-                             label.position="bottom")) +
   theme_minimal() +
   scale_x_discrete(labels=c('5.5', '6.5', '7.5', 
                             '8.5', '9.5'), expand=c(0.04,0)) +
-  scale_y_discrete(expand = c(0.04,0)) +
-  coord_cartesian(clip = "off") +
   labs(
     title = "GPA vs. Study Hours of Indian Students",
     x = "GPA",
     y= "# of hours studied daily",
     key = "Age Group"
   ) +
-theme (
-  #Almost all of these lines are from AI. I was having lots of trouble
-  #alligning the title and legend and overall presentation of the graph.
-  legend.position="right",
-  legend.justification = "left",
-  legend.margin = margin(0,0,0,0),
-  legend.box.spacing= unit(0.1, "cm"),
-  axis.title = element_text(size=12),
-  axis.text = element_text(margin=margin(t=0, r=10, b=0, l=0)),
-  plot.margin = margin(t=0, r=0, b=0, l=10),
-  plot.title = element_text(face="bold", color="purple2", size=15, vjust = 55)
-)
+  theme (
+    #Almost all of these lines are from AI. I was having lots of trouble
+    #alligning the title and legend and overall presentation of the graph.
+    legend.position="right",
+    legend.justification = "left",
+    legend.margin = margin(0,0,0,0),
+    legend.box.spacing= unit(0.1, "cm"),
+    axis.title = element_text(size=12),
+    axis.text = element_text(margin=margin(t=0, r=10, b=0, l=0)),
+    plot.margin = margin(t=0, r=0, b=0, l=10),
+    plot.title = element_text(face="bold", color="purple2", size=15, vjust = 55)
+  )
 ggplotly(p)
 
 
@@ -239,9 +318,9 @@ p <- df |>
   ) |>
   ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
   geom_col() +
-  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2, color="palegreen2") +
+  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2, color="orchid1") +
   scale_x_continuous(limits = c(0, max(8.5))) +
-  scale_fill_distiller(palette = "Greens", direction = 1,
+  scale_fill_distiller(palette = "Purples", direction = 1,
                        name = "Average\nAcademic\nPressure") +
   labs(
     x = "Average GPA",
@@ -250,23 +329,22 @@ p <- df |>
   ggtitle("Average GPA per Indian State") +
   theme_minimal() +
   theme (
-    plot.title=element_text(face="bold",hjust=0.8, vjust=-0.5, color="palegreen2", size = 30),
-    plot.background = element_rect(fill = "springgreen4"),
+    plot.title=element_text(face="bold",hjust=0.8, vjust=-0.5, color="orchid1", size = 30),
+    plot.background = element_rect(fill = "darkorchid4"),
     panel.grid = element_blank(),
     #panel.grid.major.y = element_line(color= "white"),
     panel.ontop = TRUE,
-    axis.title.y = element_text(size = 20, color = "palegreen2"),
-    axis.text.y = element_text(size = 13, color = "palegreen2"),
-    axis.title.x = element_text(size=20, color="palegreen2"),
-    axis.text.x=element_text(size=13, color="palegreen2"),
-    legend.title = element_text(size = 15, color = "palegreen2"),
-    legend.text = element_text(size=10, color="palegreen2"),
+    axis.title.y = element_text(size = 20, color = "orchid1"),
+    axis.text.y = element_text(size = 13, color = "orchid1"),
+    axis.title.x = element_text(size=20, color="orchid1"),
+    axis.text.x=element_text(size=13, color="orchid1"),
+    legend.title = element_text(size = 15, color = "orchid1"),
+    legend.text = element_text(size=10, color="orchid1"),
   ) +
   transition_states(State, wrap = FALSE) +
   shadow_mark() +
   enter_grow() +
   enter_fade()
-
 p
 
 #Plot 3 (Static)
@@ -278,9 +356,9 @@ p <- df |>
   ) |>
   ggplot(aes(Avg_GPA, State, fill = Avg_Academic_Pressure)) +
   geom_col() +
-  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2, color="palegreen2") +
+  geom_text(aes(label =round(Avg_GPA, 2)), hjust = -0.2, color="orchid1") +
   scale_x_continuous(limits = c(0, max(8.5))) +
-  scale_fill_distiller(palette = "Greens", direction = 1,
+  scale_fill_distiller(palette = "Purples", direction = 1,
                        name = "Average\nAcademic\nPressure") +
   labs(
     x = "Average GPA",
@@ -289,17 +367,17 @@ p <- df |>
   ggtitle("Average GPA per Indian State") +
   theme_minimal() +
   theme (
-    plot.title=element_text(face="bold",hjust=.8, color="palegreen2", size = 30),
-    plot.background = element_rect(fill = "springgreen4"),
+    plot.title=element_text(face="bold",hjust=.8, color="orchid1", size = 30),
+    plot.background = element_rect(fill = "darkorchid4"),
     panel.grid = element_blank(),
     #panel.grid.major.y = element_line(color= "white"),
     panel.ontop = TRUE,
-    axis.title.y = element_text(size = 20, color = "palegreen2"),
-    axis.text.y = element_text(size = 13, color = "palegreen2"),
-    axis.title.x = element_text(size=20, color="palegreen2"),
-    axis.text.x=element_text(size=13, color="palegreen2"),
-    legend.title = element_text(size = 15, color = "palegreen2"),
-    legend.text = element_text(size=10, color="palegreen2"),
+    axis.title.y = element_text(size = 20, color = "orchid1"),
+    axis.text.y = element_text(size = 13, color = "orchid1"),
+    axis.title.x = element_text(size=20, color="orchid1"),
+    axis.text.x=element_text(size=13, color="orchid1"),
+    legend.title = element_text(size = 15, color = "orchid1"),
+    legend.text = element_text(size=10, color="orchid1"),
   ) +
   geom_vline(xintercept = 1, color = "white", linetype=3, size =0.5) +
   geom_vline(xintercept = 2, color = "white", linetype=3, size =0.5) +
