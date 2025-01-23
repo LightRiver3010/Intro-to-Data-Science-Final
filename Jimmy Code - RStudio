@@ -77,7 +77,6 @@ y
 
 
 
-
 #Actual Coding File
 
 library(tidyverse)
@@ -171,15 +170,19 @@ df |>
   filter(CGPA>2.5) |>
   ggplot(aes(GPA, `Study Hours`)) +
   geom_tile(aes(fill=Age))
+
+
 #REMINDER TO SELF - ADD DEPRESSION SQUARES ON THE BELOW GRAPH
 #(thank you <3)
 #Plot 2 V2
 p <- df |>
-  group_by(State, Ages,`Study Hours`) |>
+  group_by(State, Ages,`Study Hours`, Depression) |>
   ggplot(aes(GPA, `Study Hours`, fill=Ages)) +
   geom_tile(color="white",
             lwd=1.5,
             linetype=1) +
+  geom_tile(data=Depression) +
+  scale_size_manual("z", values =c(3,0)) +
   scale_fill_binned(
     guide = guide_colorbar(
       barwidth = 1,
@@ -208,8 +211,8 @@ p <- df |>
     key = "Age Group"
   ) +
 theme (
-  #These first two lines are from AI, I was trying to make the graph not so
-  #distant from the labels.
+  #Almost all of these lines are from AI. I was having lots of trouble
+  #alligning the title and legend and overall presentation of the graph.
   legend.position="right",
   legend.justification = "left",
   legend.margin = margin(0,0,0,0),
@@ -286,7 +289,7 @@ p <- df |>
   ggtitle("Average GPA per Indian State") +
   theme_minimal() +
   theme (
-    plot.title=element_text(face="bold",hjust=.8, vjust=-0.5, color="palegreen2", size = 30),
+    plot.title=element_text(face="bold",hjust=.8, color="palegreen2", size = 30),
     plot.background = element_rect(fill = "springgreen4"),
     panel.grid = element_blank(),
     #panel.grid.major.y = element_line(color= "white"),
@@ -310,5 +313,4 @@ p
 
 
 ggplot(df, aes(x=GPA)) +
-  geom_histogram(binwidth=1)
-geom_histogram(binwidth=1)
+  geom_histogram()
