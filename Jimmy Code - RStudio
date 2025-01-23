@@ -158,6 +158,7 @@ y
 
 #Actual Coding File
 
+#Importing the necessities 
 library(tidyverse)
 library(ggplot2)
 install.packages("gganimate")
@@ -179,8 +180,7 @@ library(plotly)
 df <- read_excel("C:/Users/jsavaryn/Downloads/IndiaDepressionV2.xlsx")
 #(Laptop Version):
 #df <- read_excel("C:/Users/savar/Testing/Coding/R/IndiaDepressionV2.xlsx")
-df
-glimpse(df)
+
 #Fixing up some columns 
 df <- rename(df, 'Student Id' = 'id')
 glimpse(df)
@@ -196,7 +196,7 @@ df
 df <- df |>
   filter(CGPA > 4.5)
 
-#Binning the GPA
+#Binning the Data
 #GPA
 df <- df |>
   mutate(GPA = cut(CGPA, breaks=c(5,6,7,8,9,10)))
@@ -218,47 +218,7 @@ df$Depression_bin
 
 
 #Making animated graphs
-p1 <- ggplot(
-  bang,
-  aes(x= CGPA, y=`Work/Study Hours`, group = `Suicidal throughts present?`) 
-) +
-  geom_line() +
-  scale_color_viridis_d() +
-  #scale_size(range=c(2,12)) +
-  #scale_x_log10() +
-  labs(x="GPA", y="Study Hours") +
-  transition_time(Age) +
-  labs(title = "Age: {frame_time}") 
-animate(p1, renderer = gifski_renderer())
-
-
-p2 <- ggplot(df, aes(x=`Study Hours`, y=Ages)) +
-  geom_col() +
-  scale_fill_distiller(palette = "Reds", direction = 1) +
-  theme_minimal() 
-ggplotly(p2)
-
-#Plot 1
-bang |>
-  select(Age, Depression, `Academic Pressure`) |>
-  ggplot(aes(x=Depression, y=`Academic Pressure`)) +
-  geom_tile(aes(fill=Age))
-
-#Plot 2 V1
-df |>
-  filter(CGPA>2.5) |>
-  ggplot(aes(GPA, `Study Hours`)) +
-  geom_tile(aes(fill=Age))
-
-df |>
-  summarize(
-  Depression_present = ifelse(sum(Depression) >= (count(Depression)/2))
-  )
-df$Depression_present
-
-#REMINDER TO SELF - ADD DEPRESSION SQUARES ON THE BELOW GRAPH
-#(thank you <3)
-#Plot 2 V2
+#Plot 1 (Interactable)
 p <- df |>
   group_by(State, Ages,`Study Hours`, Depression) |>
   summarize(
@@ -291,7 +251,7 @@ p <- df |>
   ) +
   theme (
     #Almost all of these lines are from AI. I was having lots of trouble
-    #alligning the title and legend and overall presentation of the graph.
+    #alligning the title, legend, and overall presentation of the graph.
     legend.position="right",
     legend.justification = "left",
     legend.margin = margin(0,0,0,0),
@@ -303,13 +263,7 @@ p <- df |>
   )
 ggplotly(p)
 
-
-glimpse(df)
-
-
-
-
-#Plot 3 (Animated)
+#Plot 2 (Animated)
 p <- df |>
   group_by(State) |>
   summarize(
@@ -347,7 +301,7 @@ p <- df |>
   enter_fade()
 p
 
-#Plot 3 (Static)
+#Plot 2 (Static)
 p <- df |>
   group_by(State) |>
   summarize(
@@ -388,7 +342,4 @@ p <- df |>
   geom_vline(xintercept = 7, color = "white", linetype=3, size =0.5) 
 p
 
-
-
-ggplot(df, aes(x=GPA)) +
-  geom_histogram()
+#The end!
